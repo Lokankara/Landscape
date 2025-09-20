@@ -1,7 +1,7 @@
 package com.epigenetic.landscape.service;
 
-import com.epigenetic.landscape.model.CellDto;
-import com.epigenetic.landscape.model.PCAService;
+import com.epigenetic.landscape.model.dto.CellDto;
+import com.epigenetic.landscape.analysis.PCAService;
 import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 

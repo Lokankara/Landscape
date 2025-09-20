@@ -26,8 +26,8 @@ public class CellState {
     private String stateName;
     private Double geneExpressionX;
     private Double geneExpressionY;
+    private Double geneExpressionZ;
     private Double potentialValue;
-
     @Enumerated(EnumType.STRING)
     private CellType cellType;
 }

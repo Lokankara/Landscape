@@ -1,5 +1,6 @@
-package com.epigenetic.landscape.model;
+package com.epigenetic.landscape.model.dto;
 
+import com.epigenetic.landscape.model.SimpleMatrix;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

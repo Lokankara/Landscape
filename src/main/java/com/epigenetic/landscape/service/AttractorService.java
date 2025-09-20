@@ -11,14 +11,14 @@ import java.util.List;
 @AllArgsConstructor
 public class AttractorService {
 
-
-    public List<double[]> findGridAttractors(double[][][] potentialGrid, double[] xgrid, double[] ygrid,
-            double[] zgrid) {
+    public List<double[]> findGridAttractors(
+            double[][][] potentialGrid, double[] xgrid, double[] ygrid, double[] zgrid) {
         AttractorFinder finder = new AttractorFinder();
         return finder.gridMinima(potentialGrid, xgrid, ygrid, zgrid);
     }
 
-    public List<double[]> refineAttractors(List<double[]> seeds, int fullDim, double tol, int maxIter) {
+    public List<double[]> refineAttractors(
+            List<double[]> seeds, int fullDim, double tol, int maxIter) {
         AttractorFinder finder = new AttractorFinder();
         List<double[]> refined = new ArrayList<>();
         for (double[] seed : seeds) {
@@ -28,7 +28,8 @@ public class AttractorService {
         return refined;
     }
 
-    public double[] refineSingleAttractor(double[] seed, int fullDim, double tol, int maxIter) {
+    public double[] refineSingleAttractor(
+            double[] seed, int fullDim, double tol, int maxIter) {
         AttractorFinder finder = new AttractorFinder();
         return finder.refine(seed, fullDim, tol, maxIter);
     }

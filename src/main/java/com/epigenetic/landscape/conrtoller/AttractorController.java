@@ -1,7 +1,7 @@
 package com.epigenetic.landscape.conrtoller;
 
-import com.epigenetic.landscape.model.GridRequest;
-import com.epigenetic.landscape.model.RefineRequest;
+import com.epigenetic.landscape.model.dto.GridRequest;
+import com.epigenetic.landscape.model.dto.RefineRequest;
 import com.epigenetic.landscape.service.AttractorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 
 @RestController
-@RequestMapping("/attractors")
+@RequestMapping("/api/attractors")
 @AllArgsConstructor
 public class AttractorController {
 

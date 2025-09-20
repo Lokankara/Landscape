@@ -1,22 +1,21 @@
 package com.epigenetic.landscape.conrtoller;
 
-import com.epigenetic.landscape.model.GRNModel;
-import com.epigenetic.landscape.model.GradientRequest;
-import com.epigenetic.landscape.model.SimpleMatrix;
 import com.epigenetic.landscape.model.SimulationRequest;
-import com.epigenetic.landscape.model.SimulationResult;
+import com.epigenetic.landscape.model.SimulationResponse;
+import com.epigenetic.landscape.model.dto.CellDto;
+import com.epigenetic.landscape.model.dto.GradientRequest;
 import com.epigenetic.landscape.service.SimulationService;
+import com.epigenetic.landscape.service.VisualizationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @RestController
 @RequestMapping("/api/simulation")
@@ -24,15 +23,16 @@ import java.util.stream.IntStream;
 public class SimulationController {
 
     private final SimulationService simulationService;
+    private final VisualizationService visualizationService;
 
     @PostMapping("/run")
-    public ResponseEntity<SimulationResult> runSimulation(@RequestBody SimulationRequest request) {
+    public ResponseEntity<SimulationResponse> runSimulation(@RequestBody @Valid SimulationRequest request) {
         if (request == null || request.getInitialX() == null || request.getInitialY() == null ||
                 request.getSteps() == null || request.getTimeStep() == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        SimulationResult result = simulationService.runSimulation(request);
+        SimulationResponse result = simulationService.runSimulation(request);
         return ResponseEntity.ok(result);
     }
 
@@ -47,12 +47,12 @@ public class SimulationController {
     }
 
     @PostMapping("/trajectory")
-    public ResponseEntity<List<double[]>> simulateTrajectory(@RequestBody SimulationRequest request) {
+    public ResponseEntity<List<double[]>> simulateTrajectory(@RequestBody @Valid SimulationRequest request) {
         if (request == null || request.getStart() == null || request.getStart().length < 2) {
             return ResponseEntity.badRequest().build();
         }
         double[] x0 = request.getStart();
-        double dt = request.getDt() > 0 ? request.getDt() : 0.01;
+        double dt = request.getDelta() > 0 ? request.getDelta() : 0.01;
         int steps = request.getSampleLimit() > 0 ? request.getSampleLimit() : 500;
         double sigma = request.getDiffusionCoefficient() > 0 ? request.getDiffusionCoefficient() : 0.05;
 
@@ -68,13 +68,18 @@ public class SimulationController {
         List<List<double[]>> ensemble = simulationService.simulateEnsemble(
                 request.getStart(),
                 request.getEnsembleRuns(),
-                request.getDt(),
+                request.getDelta(),
                 request.getSampleLimit(),
                 request.getDiffusionCoefficient()
         );
         return ResponseEntity.ok(ensemble);
     }
 
+    @PostMapping("")
+    public ResponseEntity<List<double[]>> simulateAndReduce(@RequestBody CellDto initialState) {
+        List<CellDto> trajectory = simulationService.simulateCellTrajectory(initialState, 0.1, 100);
+        return ResponseEntity.ok(visualizationService.performPCA(trajectory));
+    }
 
     @GetMapping("/stable-states")
     public ResponseEntity<List<double[]>> getStableStates() {
@@ -90,17 +95,7 @@ public class SimulationController {
             return ResponseEntity.badRequest().build();
         }
 
-        int n = request.getStart().length;
-        SimpleMatrix W = new SimpleMatrix(n, n);
-        SimpleMatrix basal = new SimpleMatrix(n, 1);
-        SimpleMatrix decay = new SimpleMatrix(n, 1);
-        IntStream.range(0, n).forEach(i -> decay.set(i, 0, 1.0));
-        GRNModel model = new GRNModel(n, W, basal, decay);
-        List<List<double[]>> ensemble = simulationService.simulateEnsemble(model, request);
-        List<double[][]> ensembleArray = ensemble.stream()
-                .map(l -> l.toArray(new double[0][]))
-                .collect(Collectors.toList());
-
+        List<double[][]> ensembleArray = simulationService.simulateEnsemble(request);
         return ResponseEntity.ok(ensembleArray);
     }
 }

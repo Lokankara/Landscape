@@ -1,15 +1,16 @@
 package com.epigenetic.landscape.service;
 
 import com.epigenetic.landscape.analysis.EulerMaruyama;
-import com.epigenetic.landscape.model.CellDto;
-import com.epigenetic.landscape.model.GRNModel;
+import com.epigenetic.landscape.model.dto.CellDto;
+import com.epigenetic.landscape.model.dto.GRNModel;
 import com.epigenetic.landscape.model.SimpleMatrix;
 import com.epigenetic.landscape.model.SimulationRequest;
-import com.epigenetic.landscape.model.SimulationResult;
+import com.epigenetic.landscape.model.SimulationResponse;
 import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -33,7 +34,7 @@ public class SimulationService {
         SimpleMatrix x = SimpleMatrix.colVector(x0);
         List<double[]> traj = new ArrayList<>();
         for (int t = 0; t < steps; t++) {
-            x = new EulerMaruyama().step(x, dt, sigma);
+            x = new EulerMaruyama(10).step(x, dt, sigma);
             double[] state = new double[x.getRows()];
             for (int i = 0; i < x.getRows(); i++)
                 state[i] = x.get(i, 0);
@@ -44,12 +45,10 @@ public class SimulationService {
 
     public List<CellDto> simulateCellTrajectory(CellDto initialState, double timeStep, int totalSteps) {
         List<CellDto> trajectory = new ArrayList<>();
-        CellDto current = initialState;
-        trajectory.add(current);
-        for (int step = 1; step <= totalSteps; step++) {
-            current = grnService.calculateGeneRegulatoryDynamics(current);
-            trajectory.add(current);
-        }
+        trajectory.add(initialState);
+        IntStream.rangeClosed(1, totalSteps)
+                .mapToObj(step -> grnService.calculateGeneRegulatoryDynamics(initialState))
+                .forEach(trajectory::add);
         return trajectory;
     }
 
@@ -134,33 +133,34 @@ public class SimulationService {
 
     public List<double[]> simulateTrajectory(GRNModel model, double[] x0, double dt, int steps, double sigma,
             long seed) {
-        EulerMaruyama em = new EulerMaruyama();
+        EulerMaruyama em = new EulerMaruyama(seed, model);
         int n = x0.length;
         double[] x = x0.clone();
         List<double[]> traj = new ArrayList<>();
         for (int t = 0; t < steps; t++) {
             SimpleMatrix xm = SimpleMatrix.colVector(x);
             xm = em.step(xm, dt, sigma);
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < n; i++) {
                 x[i] = xm.get(i, 0);
-            double[] copy = new double[n];
-            System.arraycopy(x, 0, copy, 0, n);
-            traj.add(copy);
+            }
+            traj.add(Arrays.copyOf(x, n));
         }
         return traj;
     }
 
-    public SimulationResult runSimulation(SimulationRequest request) {
+    public SimulationResponse runSimulation(SimulationRequest request) {
         double initX = (request.getStart() != null && request.getStart().length > 0) ? request.getStart()[0] : 0.1;
         double initY = (request.getStart() != null && request.getStart().length > 1) ? request.getStart()[1] : 0.1;
-        double timeStep = request.getDt() > 0 ? request.getDt() : 0.01;
+        double initZ = (request.getStart() != null && request.getStart().length > 2) ? request.getStart()[2] : 0.1;
+        double timeStep = request.getDelta() > 0 ? request.getDelta() : 0.01;
         int steps = request.getSampleLimit() > 0 ? request.getSampleLimit() : 500;
         int ensembleRuns = Math.max(request.getBins(), 0);
         double sigma = request.getDiffusionCoefficient() > 0 ? request.getDiffusionCoefficient() : 0.05;
 
-        CellDto initial = new CellDto(2);
+        CellDto initial = new CellDto(3);
         initial.getGeneExpression().set(0, initX);
         initial.getGeneExpression().set(1, initY);
+        initial.getGeneExpression().set(2, initZ);
         initial.setType(null);
 
         List<CellDto> cellTrajectory = simulateCellTrajectory(initial, timeStep, steps);
@@ -205,7 +205,7 @@ public class SimulationService {
         for (int i = 0; i < potentialList.size(); i++)
             potentialPoints[i] = potentialList.get(i);
 
-        SimulationResult result = SimulationResult.builder()
+        SimulationResponse result = SimulationResponse.builder()
                 .samples(samples)
                 .nodes(nodes)
                 .potentialPoints(potentialPoints)
@@ -221,9 +221,15 @@ public class SimulationService {
         return result;
     }
 
-    public List<List<double[]>> simulateEnsemble(GRNModel model, SimulationRequest request) {
+    public List<double[][]> simulateEnsemble(SimulationRequest request) {
+        int n = request.getStart().length;
+        SimpleMatrix W = new SimpleMatrix(n, n);
+        SimpleMatrix basal = new SimpleMatrix(n, 1);
+        SimpleMatrix decay = new SimpleMatrix(n, 1);
+        IntStream.range(0, n).forEach(i -> decay.set(i, 0, 1.0));
+        GRNModel model = new GRNModel(n, W, basal, decay);
         double[] x0 = request.getStart();
-        double dt = request.getDt() > 0 ? request.getDt() : 0.01;
+        double dt = request.getDelta() > 0 ? request.getDelta() : 0.01;
         int steps = request.getSampleLimit() > 0 ? request.getSampleLimit() : 500;
         double sigma = request.getDiffusionCoefficient() > 0 ? request.getDiffusionCoefficient() : 0.05;
         int runs = request.getBins() > 0 ? request.getBins() : 1;
@@ -232,6 +238,8 @@ public class SimulationService {
         for (int r = 0; r < runs; r++)
             ensemble.add(simulateTrajectory(model, x0, dt, steps, sigma, r + 1));
 
-        return ensemble;
+        return ensemble.stream()
+                .map(l -> l.toArray(new double[0][]))
+                .collect(Collectors.toList());
     }
 }

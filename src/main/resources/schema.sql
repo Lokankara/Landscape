@@ -3,7 +3,22 @@ CREATE TABLE cell_state (
     state_name VARCHAR(255),
     gene_expression_x DOUBLE,
     gene_expression_y DOUBLE,
+    gene_expression_z DOUBLE,
     potential_value DOUBLE,
     cell_type VARCHAR(255),
     simulation_run_id BIGINT
 );
+
+INSERT INTO cell_state
+(simulation_run_id, state_name, gene_expression_x, gene_expression_y, gene_expression_z, potential_value, cell_type)
+VALUES
+(1, 'PluripotentStem', 0.01, 0.02, 0.03, 0.5, 'PLURIPOTENT'),
+(1, 'NeuronCommitted', 0.10, 0.15, 0.12, 0.7, 'NEURON'),
+(1, 'CardiomyocyteActive', 0.25, 0.30, 0.28, 0.6, 'CARDIOMYOCYTE'),
+(1, 'UncommittedCell', 0.05, 0.10, 0.08, 0.4, 'UNCOMMITTED'),
+(2, 'StemProgenitor', 0.50, 0.60, 0.55, 0.9, 'PLURIPOTENT'),
+(2, 'NeuralLineage', 0.35, 0.40, 0.38, 0.3, 'NEURON'),
+(2, 'HeartMuscleCell', 0.15, 0.20, 0.18, 0.8, 'CARDIOMYOCYTE'),
+(2, 'Undifferentiated', 0.45, 0.50, 0.48, 0.2, 'UNCOMMITTED'),
+(3, 'EarlyStemCell', 0.05, 0.07, 0.06, 0.1, 'PLURIPOTENT'),
+(3, 'NeuronPrecursors', 0.80, 0.85, 0.82, 0.95, 'NEURON');

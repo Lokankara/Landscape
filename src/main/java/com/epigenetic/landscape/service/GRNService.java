@@ -1,11 +1,10 @@
 package com.epigenetic.landscape.service;
 
 import com.epigenetic.landscape.dao.CellStateRepository;
-import com.epigenetic.landscape.model.CellDto;
-import com.epigenetic.landscape.model.CellState;
+import com.epigenetic.landscape.model.dto.CellDto;
 import com.epigenetic.landscape.model.CellType;
 import com.epigenetic.landscape.model.SimulationRequest;
-import com.epigenetic.landscape.model.SimulationResult;
+import com.epigenetic.landscape.model.SimulationResponse;
 import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -19,12 +18,12 @@ import java.util.Random;
 @AllArgsConstructor
 public class GRNService {
 
+    private final Random random = new Random();
     private final CellStateRepository cellStateRepository;
     private static final double DEGRADATION_RATE = 0.2;
     private static final double NOISE_AMPLITUDE = 0.05;
-    private final Random random = new Random();
 
-    public SimulationResult simulateTrajectory(SimulationRequest request) {
+    public SimulationResponse simulateTrajectory(SimulationRequest request) {
         List<Double> xValues = new ArrayList<>();
         List<Double> yValues = new ArrayList<>();
         List<Double> potentialValues = new ArrayList<>();
@@ -44,7 +43,7 @@ public class GRNService {
             cellTypes.add(determineCellType(x, y).name());
         }
 
-        return SimulationResult.builder()
+        return SimulationResponse.builder()
                 .xValues(xValues)
                 .yValues(yValues)
                 .potentialValues(potentialValues)
@@ -85,24 +84,14 @@ public class GRNService {
 
     public Flux<CellDto> getAllStatesDto() {
         return cellStateRepository.findAll()
-                .map(this::toDto);
+                .map(Mapper::toDto);
     }
 
     public Flux<CellDto> searchStates(String query) {
         if (query == null || query.trim().isEmpty())
             return getAllStatesDto();
         return cellStateRepository.findByStateNameContainingIgnoreCase(query)
-                .map(this::toDto);
-    }
-
-    private CellDto toDto(CellState state) {
-        CellDto dto = new CellDto(2);
-        dto.setId(state.getId() == null ? null : state.getId().toString());
-        dto.getGeneExpression().set(0, state.getGeneExpressionX() != null ? state.getGeneExpressionX() : 0.0);
-        dto.getGeneExpression().set(1, state.getGeneExpressionY() != null ? state.getGeneExpressionY() : 0.0);
-        dto.setType(state.getCellType());
-        dto.setPotentialGradient(Arrays.asList(0.0, 0.0));
-        return dto;
+                .map(Mapper::toDto);
     }
 
     public List<double[]> getStableStates() {

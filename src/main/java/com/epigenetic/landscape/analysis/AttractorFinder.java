@@ -1,6 +1,6 @@
 package com.epigenetic.landscape.analysis;
 
-import com.epigenetic.landscape.model.GRNModel;
+import com.epigenetic.landscape.model.dto.GRNModel;
 import com.epigenetic.landscape.model.SimpleMatrix;
 import lombok.Getter;
 

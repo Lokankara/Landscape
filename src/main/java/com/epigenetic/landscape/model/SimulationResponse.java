@@ -11,12 +11,13 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SimulationResult {
+public class SimulationResponse {
     public double[][] samples;
     public double[][] nodes;
     public double[][] potentialPoints;
     private List<Double> xValues;
     private List<Double> yValues;
+    private List<Double> zValues;
     private List<Double> potentialValues;
     private List<String> cellTypes;
 }

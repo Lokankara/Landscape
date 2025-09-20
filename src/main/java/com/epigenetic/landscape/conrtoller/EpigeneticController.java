@@ -1,8 +1,8 @@
 package com.epigenetic.landscape.conrtoller;
 
-import com.epigenetic.landscape.model.CellDto;
+import com.epigenetic.landscape.model.dto.CellDto;
 import com.epigenetic.landscape.model.CellType;
-import com.epigenetic.landscape.model.Point3D;
+import com.epigenetic.landscape.model.dto.Point3D;
 import com.epigenetic.landscape.service.EpigeneticService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

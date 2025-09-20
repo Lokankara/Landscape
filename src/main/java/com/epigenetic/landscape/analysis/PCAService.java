@@ -1,4 +1,4 @@
-package com.epigenetic.landscape.model;
+package com.epigenetic.landscape.analysis;
 
 import org.springframework.stereotype.Service;
 

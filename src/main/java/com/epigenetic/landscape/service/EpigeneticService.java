@@ -1,9 +1,9 @@
 package com.epigenetic.landscape.service;
 
-import com.epigenetic.landscape.model.CellDto;
 import com.epigenetic.landscape.model.CellState;
 import com.epigenetic.landscape.model.CellType;
-import com.epigenetic.landscape.model.Point3D;
+import com.epigenetic.landscape.model.dto.CellDto;
+import com.epigenetic.landscape.model.dto.Point3D;
 import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -13,18 +13,12 @@ import java.util.Random;
 @Service
 @AllArgsConstructor
 public class EpigeneticService {
+
+    private final GRNService grnService;
+    private final Random random = new Random();
     private static final double DEGRADATION_RATE = 0.2;
     private static final double NOISE_AMPLITUDE = 0.05;
     private static final double DIFFERENTIATION_THRESHOLD = 2.5;
-    private final Random random = new Random();
-    private final GRNService grnService;
-
-
-    private double geneRegFunction(double x, double y, int dim) {
-        return dim == 0
-                ? (1.0 / (1.0 + Math.pow(y, 4))) - DEGRADATION_RATE * x
-                : (1.0 / (1.0 + Math.pow(x, 4))) - DEGRADATION_RATE * y;
-    }
 
     private double calculatePotential(double x, double y) {
         return -Math.log(1.0 + Math.pow(x, 4)) / 4.0
@@ -42,22 +36,12 @@ public class EpigeneticService {
         return CellType.UNCOMMITTED;
     }
 
-    private CellDto toDto(CellState state) {
-        CellDto dto = new CellDto(2);
-        dto.getGeneExpression().set(0, state.getGeneExpressionX());
-        dto.getGeneExpression().set(1, state.getGeneExpressionY());
-        dto.setType(state.getCellType());
-        dto.getPotentialGradient().set(0, 0.0);
-        dto.getPotentialGradient().set(1, 0.0);
-        return dto;
-    }
-
     public Flux<Point3D> getPotentialLandscape() {
         return grnService.getAllStatesDto()
                 .map(dto -> new Point3D(
-                        dto.getGeneExpression().get(0),
+                        dto.getGeneExpression().getFirst(),
                         dto.getGeneExpression().get(1),
-                        dto.getPotentialGradient().get(0)
+                        dto.getGeneExpression().get(2)
                 ));
     }
 
@@ -70,13 +54,14 @@ public class EpigeneticService {
         CellState initialState = new CellState();
         initialState.setGeneExpressionX(initialDto.getGeneExpression().get(0));
         initialState.setGeneExpressionY(initialDto.getGeneExpression().get(1));
+        initialState.setGeneExpressionZ(initialDto.getGeneExpression().get(3));
         initialState.setCellType(initialDto.getType());
         initialState.setId(null);
 
         return Flux.range(0, steps)
                 .scan(initialState, (currentState, step) ->
                         calculateNextState(currentState, step, simulationRunId))
-                .map(this::toDto);
+                .map(Mapper::toDto);
     }
 
     private CellState calculateNextState(CellState currentState, Integer step, Long simulationRunId) {
