@@ -1,8 +1,8 @@
 package com.epigenetic.landscape.conrtoller;
 
 import com.epigenetic.landscape.model.dto.CellDto;
-import com.epigenetic.landscape.model.SimulationRequest;
-import com.epigenetic.landscape.model.SimulationResponse;
+import com.epigenetic.landscape.model.dto.SimulationRequest;
+import com.epigenetic.landscape.model.dto.SimulationResponse;
 import com.epigenetic.landscape.service.GRNService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

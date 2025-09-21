@@ -1,4 +1,4 @@
-package com.epigenetic.landscape.model;
+package com.epigenetic.landscape.model.dto;
 
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

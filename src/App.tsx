@@ -1,27 +1,39 @@
-import React from 'react'
-import SimulationForm from './app/components/SimulationForm'
-import AttractorsForm from './app/components/AttractorsForm'
-import LandscapeView from './app/components/LandscapeView'
+import React, {useState} from 'react';
+import {BrowserRouter as Router, Link, Navigate, Route, Routes} from 'react-router-dom';
+import {AppBar, Box, Tab, Tabs} from '@mui/material';
+import AttractorsTab from './app/components/AttractorsTab';
+import SimulationTab from './app/components/SimulationTab';
+import LandscapeTab from './app/components/LandscapeTab';
+import EpigeneticTab from './app/components/EpigeneticTab';
 
+const App: React.FC = () => {
+    const [tabIndex, setTabIndex] = useState<number>(0);
 
-export default function App() {
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 p-6">
-      <header className="max-w-6xl mx-auto mb-6">
-        <h1 className="text-2xl font-semibold">Epigenetic Landscape</h1>
-        <p className="text-sm text-slate-600">Interactive UI for simulation, landscape and attractor analysis</p>
-      </header>
+    const handleChange = (_: React.SyntheticEvent, newValue: number) => {
+        setTabIndex(newValue);
+    };
 
+    return (
+        <Router>
+            <AppBar position="static">
+                <Tabs value={tabIndex} onChange={handleChange} variant="fullWidth">
+                    <Tab label="Attractors" component={Link} to="/attractors"/>
+                    <Tab label="Simulation" component={Link} to="/simulation"/>
+                    <Tab label="Landscape" component={Link} to="/landscape"/>
+                    <Tab label="Epigenetic" component={Link} to="/epigenetic"/>
+                </Tabs>
+            </AppBar>
+            <Box sx={{p: 2}}>
+                <Routes>
+                    <Route path="/" element={<Navigate to="/attractors" replace/>}/>
+                    <Route path="/attractors" element={<AttractorsTab/>}/>
+                    <Route path="/simulation" element={<SimulationTab/>}/>
+                    <Route path="/landscape" element={<LandscapeTab/>}/>
+                    <Route path="/epigenetic" element={<EpigeneticTab/>}/>
+                </Routes>
+            </Box>
+        </Router>
+    );
+};
 
-      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="col-span-1 space-y-6">
-          <SimulationForm />
-          <AttractorsForm />
-        </div>
-        <div className="col-span-2">
-          <LandscapeView />
-        </div>
-      </main>
-    </div>
-  )
-}
+export default App;

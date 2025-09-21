@@ -4,8 +4,8 @@ import com.epigenetic.landscape.analysis.EulerMaruyama;
 import com.epigenetic.landscape.model.dto.CellDto;
 import com.epigenetic.landscape.model.dto.GRNModel;
 import com.epigenetic.landscape.model.SimpleMatrix;
-import com.epigenetic.landscape.model.SimulationRequest;
-import com.epigenetic.landscape.model.SimulationResponse;
+import com.epigenetic.landscape.model.dto.SimulationRequest;
+import com.epigenetic.landscape.model.dto.SimulationResponse;
 import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 

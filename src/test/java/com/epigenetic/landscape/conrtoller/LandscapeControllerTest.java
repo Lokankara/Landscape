@@ -3,8 +3,8 @@ package com.epigenetic.landscape.conrtoller;
 import static org.mockito.ArgumentMatchers.any;
 
 import com.epigenetic.landscape.model.dto.CellDto;
-import com.epigenetic.landscape.model.SimulationRequest;
-import com.epigenetic.landscape.model.SimulationResponse;
+import com.epigenetic.landscape.model.dto.SimulationRequest;
+import com.epigenetic.landscape.model.dto.SimulationResponse;
 import com.epigenetic.landscape.service.GRNService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

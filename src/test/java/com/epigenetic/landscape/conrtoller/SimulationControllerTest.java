@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 
 import com.epigenetic.landscape.model.dto.CellDto;
 import com.epigenetic.landscape.model.dto.GradientRequest;
-import com.epigenetic.landscape.model.SimulationRequest;
-import com.epigenetic.landscape.model.SimulationResponse;
+import com.epigenetic.landscape.model.dto.SimulationRequest;
+import com.epigenetic.landscape.model.dto.SimulationResponse;
 import com.epigenetic.landscape.service.SimulationService;
 import com.epigenetic.landscape.service.VisualizationService;
 import org.junit.jupiter.api.BeforeEach;

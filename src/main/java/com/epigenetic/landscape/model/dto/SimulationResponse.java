@@ -1,4 +1,4 @@
-package com.epigenetic.landscape.model;
+package com.epigenetic.landscape.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
